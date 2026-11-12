@@ -1,0 +1,13 @@
+WEBGIS KAWASAN HUTAN — DASHBOARD
+
+1. Ekstrak ZIP ini.
+2. Buka index.html di browser. Jika browser memblokir data lokal, gunakan server lokal.
+3. Contoh: buka terminal di folder ini, jalankan python -m http.server 8000, lalu buka http://localhost:8000
+4. Untuk publikasi, unggah seluruh isi folder ke layanan hosting statis yang sesuai.
+
+CATATAN:
+- OpenTopoMap memerlukan koneksi internet dan tunduk pada kebijakan penyedia tile.
+- Layer SIGAP WMTS memerlukan server eksternal aktif dan izin akses/CORS.
+- Data dan kode peta dari qgis2web dipertahankan.
+- Layer control baru ada di sidebar; kontrol bawaan OpenLayers mungkin tetap tampil.
+- Periksa kebijakan publikasi dan sensitivitas data sebelum mengunggah ke internet.
