@@ -15,6 +15,7 @@ var wms_layers = [];
  
 /* SIGAP KAWASAN HUTAN - WMS JUNI 2026 */
 
+
 var sigapSource = new ol.source.TileWMS({
     url: 'https://sigap.kehutanan.go.id/sigap-forge-geoserver-2026/sigap/ows',
 
@@ -26,9 +27,9 @@ var sigapSource = new ol.source.TileWMS({
         'VERSION': '1.1.1'
     },
 
-    serverType: 'geoserver',
-    crossOrigin: 'anonymous'
+    serverType: 'geoserver'
 });
+
 
 var lyr_kwshutan_ar_250k_des2025_1 =
     new ol.layer.Tile({
