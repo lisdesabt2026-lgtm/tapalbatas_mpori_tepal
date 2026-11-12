@@ -12,54 +12,42 @@ var wms_layers = [];
             })
         });
 
-    
-
-/* ==========================================
-   SIGAP - KAWASAN HUTAN JUNI 2026
-   Layanan WMS GeoServer
-   ========================================== */
+ 
+/* SIGAP KAWASAN HUTAN - WMS JUNI 2026 */
 
 var sigapSource = new ol.source.TileWMS({
     url: 'https://sigap.kehutanan.go.id/sigap-forge-geoserver-2026/sigap/ows',
 
     params: {
-        'SERVICE': 'WMS',
-        'VERSION': '1.1.1',
         'LAYERS': 'kwshutan_ar_250k_jun2026',
-        'STYLES': 'kwshutan_ar_250k_jun2026_style',
+        'STYLES': '',
         'FORMAT': 'image/png',
         'TRANSPARENT': true,
-        'TILED': true
+        'VERSION': '1.1.1'
     },
 
-    projection: 'EPSG:3857',
     serverType: 'geoserver',
     crossOrigin: 'anonymous'
 });
-
-/* Mempertahankan nama variabel lama agar
-   kompatibel dengan layersList dan dashboard */
 
 var lyr_kwshutan_ar_250k_des2025_1 =
     new ol.layer.Tile({
         title: 'Kawasan Hutan SIGAP - Juni 2026',
         type: 'overlay',
-        opacity: 0.65,
         visible: true,
+        opacity: 0.7,
         source: sigapSource
     });
 
-/* Diagnostik */
-
 sigapSource.on('tileloadend', function () {
-    console.info('[SIGAP] Tile WMS berhasil dimuat');
+    console.info('[SIGAP WMS] Tile berhasil dimuat');
 });
 
 sigapSource.on('tileloaderror', function () {
-    console.error('[SIGAP] Tile WMS gagal dimuat');
+    console.error('[SIGAP WMS] Tile gagal dimuat');
 });
 
-console.info('[SIGAP] WMS Juni 2026 aktif');
+console.info('[SIGAP WMS] Konfigurasi baru aktif');
 
 var format_point_mprilembo_rencana_awal_2 = new ol.format.GeoJSON();
 var features_point_mprilembo_rencana_awal_2 = format_point_mprilembo_rencana_awal_2.readFeatures(json_point_mprilembo_rencana_awal_2, 
