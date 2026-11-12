@@ -13,144 +13,53 @@ var wms_layers = [];
         });
 
     
+
 /* ==========================================
-   SIGAP KAWASAN HUTAN
-   WMTS + DIAGNOSTIK
+   SIGAP - KAWASAN HUTAN JUNI 2026
+   Layanan WMS GeoServer
    ========================================== */
 
-var projection_kwshutan_ar_250k_des2025_1 =
-    ol.proj.get('EPSG:3857');
+var sigapSource = new ol.source.TileWMS({
+    url: 'https://sigap.kehutanan.go.id/sigap-forge-geoserver-2026/sigap/ows',
 
-var projectionExtent_kwshutan_ar_250k_des2025_1 =
-    projection_kwshutan_ar_250k_des2025_1.getExtent();
+    params: {
+        'SERVICE': 'WMS',
+        'VERSION': '1.1.1',
+        'LAYERS': 'kwshutan_ar_250k_jun2026',
+        'STYLES': 'kwshutan_ar_250k_jun2026_style',
+        'FORMAT': 'image/png',
+        'TRANSPARENT': true,
+        'TILED': true
+    },
 
-var size_kwshutan_ar_250k_des2025_1 =
-    ol.extent.getWidth(
-        projectionExtent_kwshutan_ar_250k_des2025_1
-    ) / 256;
-
-var resolutions_kwshutan_ar_250k_des2025_1 = [];
-var matrixIds_kwshutan_ar_250k_des2025_1 = [];
-
-/*
- * Pertahankan level 0–13 sesuai konfigurasi asli.
- * Level tambahan harus didukung server SIGAP.
- */
-for (var z = 0; z < 14; z++) {
-    resolutions_kwshutan_ar_250k_des2025_1.push(
-        size_kwshutan_ar_250k_des2025_1 /
-        Math.pow(2, z)
-    );
-
-    matrixIds_kwshutan_ar_250k_des2025_1.push(
-        String(z)
-    );
-}
-
-var sigapWMTSUrl =
-    'https://sigap.kehutanan.go.id/' +
-    'sigap-forge-geoserver-2026/' +
-    'sigap/gwc/service/wmts';
-
-var sigapSource = new ol.source.WMTS({
-    url: sigapWMTSUrl,
-
-    layer: 'kwshutan_ar_250k_des2025',
-
-    matrixSet: 'EPSG:3857',
-
-    format: 'image/jpeg',
-
-    projection:
-        projection_kwshutan_ar_250k_des2025_1,
-
-    tileGrid: new ol.tilegrid.WMTS({
-        origin: ol.extent.getTopLeft(
-            projectionExtent_kwshutan_ar_250k_des2025_1
-        ),
-
-        resolutions:
-            resolutions_kwshutan_ar_250k_des2025_1,
-
-        matrixIds:
-            matrixIds_kwshutan_ar_250k_des2025_1
-    }),
-
-    style:
-        'sigap:kwshutan_ar_250k_des2025_style',
-
-    wrapX: true,
-
-    attributions: 'SIGAP Kementerian Kehutanan'
+    projection: 'EPSG:3857',
+    serverType: 'geoserver',
+    crossOrigin: 'anonymous'
 });
 
-/* Membuat layer SIGAP */
+/* Mempertahankan nama variabel lama agar
+   kompatibel dengan layersList dan dashboard */
 
 var lyr_kwshutan_ar_250k_des2025_1 =
     new ol.layer.Tile({
-
-        title: 'Kawasan Hutan SIGAP',
-
-        source: sigapSource,
-
-        opacity: 0.75,
-
-        visible: true
+        title: 'Kawasan Hutan SIGAP - Juni 2026',
+        type: 'overlay',
+        opacity: 0.65,
+        visible: true,
+        source: sigapSource
     });
 
-/* ==========================================
-   PEMERIKSAAN TILE SIGAP
-   ========================================== */
-
-var sigapErrorCount = 0;
-var sigapLoadedCount = 0;
-
-sigapSource.on('tileloadstart', function () {
-    console.debug(
-        '[SIGAP] Memuat tile kawasan hutan...'
-    );
-});
+/* Diagnostik */
 
 sigapSource.on('tileloadend', function () {
-    sigapLoadedCount++;
-
-    if (sigapLoadedCount === 1) {
-        console.info(
-            '[SIGAP] Tile pertama berhasil dimuat.'
-        );
-    }
+    console.info('[SIGAP] Tile WMS berhasil dimuat');
 });
 
-sigapSource.on('tileloaderror', function (event) {
-    sigapErrorCount++;
-
-    console.error(
-        '[SIGAP] Tile gagal dimuat. Total error:',
-        sigapErrorCount
-    );
-
-    if (event && event.tile) {
-        var image = event.tile.getImage &&
-            event.tile.getImage();
-
-        if (image && image.src) {
-            console.error(
-                '[SIGAP] URL tile gagal:',
-                image.src
-            );
-        }
-    }
-
-    console.warn(
-        '[SIGAP] Periksa tab Network untuk ' +
-        'mengetahui status HTTP, CORS, ' +
-        'atau kesalahan konfigurasi WMTS.'
-    );
+sigapSource.on('tileloaderror', function () {
+    console.error('[SIGAP] Tile WMS gagal dimuat');
 });
 
-console.info(
-    '[SIGAP] Konfigurasi WMTS diagnostik aktif.'
-);
+console.info('[SIGAP] WMS Juni 2026 aktif');
 
 var format_point_mprilembo_rencana_awal_2 = new ol.format.GeoJSON();
 var features_point_mprilembo_rencana_awal_2 = format_point_mprilembo_rencana_awal_2.readFeatures(json_point_mprilembo_rencana_awal_2, 
