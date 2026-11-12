@@ -12,39 +12,146 @@ var wms_layers = [];
             })
         });
 
-    var projection_kwshutan_ar_250k_des2025_1 = ol.proj.get('EPSG:3857');
-    var projectionExtent_kwshutan_ar_250k_des2025_1 = projection_kwshutan_ar_250k_des2025_1.getExtent();
-    var size_kwshutan_ar_250k_des2025_1 = ol.extent.getWidth(projectionExtent_kwshutan_ar_250k_des2025_1) / 256;
-    var resolutions_kwshutan_ar_250k_des2025_1 = new Array(14);
-    var matrixIds_kwshutan_ar_250k_des2025_1 = new Array(14);
-    for (var z = 0; z < 14; ++z) {
-        // generate resolutions and matrixIds arrays for this WMTS
-        resolutions_kwshutan_ar_250k_des2025_1[z] = size_kwshutan_ar_250k_des2025_1 / Math.pow(2, z);
-        matrixIds_kwshutan_ar_250k_des2025_1[z] = z;
+    
+/* ==========================================
+   SIGAP KAWASAN HUTAN
+   WMTS + DIAGNOSTIK
+   ========================================== */
+
+var projection_kwshutan_ar_250k_des2025_1 =
+    ol.proj.get('EPSG:3857');
+
+var projectionExtent_kwshutan_ar_250k_des2025_1 =
+    projection_kwshutan_ar_250k_des2025_1.getExtent();
+
+var size_kwshutan_ar_250k_des2025_1 =
+    ol.extent.getWidth(
+        projectionExtent_kwshutan_ar_250k_des2025_1
+    ) / 256;
+
+var resolutions_kwshutan_ar_250k_des2025_1 = [];
+var matrixIds_kwshutan_ar_250k_des2025_1 = [];
+
+/*
+ * Pertahankan level 0–13 sesuai konfigurasi asli.
+ * Level tambahan harus didukung server SIGAP.
+ */
+for (var z = 0; z < 14; z++) {
+    resolutions_kwshutan_ar_250k_des2025_1.push(
+        size_kwshutan_ar_250k_des2025_1 /
+        Math.pow(2, z)
+    );
+
+    matrixIds_kwshutan_ar_250k_des2025_1.push(
+        String(z)
+    );
+}
+
+var sigapWMTSUrl =
+    'https://sigap.kehutanan.go.id/' +
+    'sigap-forge-geoserver-2026/' +
+    'sigap/gwc/service/wmts';
+
+var sigapSource = new ol.source.WMTS({
+    url: sigapWMTSUrl,
+
+    layer: 'kwshutan_ar_250k_des2025',
+
+    matrixSet: 'EPSG:3857',
+
+    format: 'image/jpeg',
+
+    projection:
+        projection_kwshutan_ar_250k_des2025_1,
+
+    tileGrid: new ol.tilegrid.WMTS({
+        origin: ol.extent.getTopLeft(
+            projectionExtent_kwshutan_ar_250k_des2025_1
+        ),
+
+        resolutions:
+            resolutions_kwshutan_ar_250k_des2025_1,
+
+        matrixIds:
+            matrixIds_kwshutan_ar_250k_des2025_1
+    }),
+
+    style:
+        'sigap:kwshutan_ar_250k_des2025_style',
+
+    wrapX: true,
+
+    attributions: 'SIGAP Kementerian Kehutanan'
+});
+
+/* Membuat layer SIGAP */
+
+var lyr_kwshutan_ar_250k_des2025_1 =
+    new ol.layer.Tile({
+
+        title: 'Kawasan Hutan SIGAP',
+
+        source: sigapSource,
+
+        opacity: 0.75,
+
+        visible: true
+    });
+
+/* ==========================================
+   PEMERIKSAAN TILE SIGAP
+   ========================================== */
+
+var sigapErrorCount = 0;
+var sigapLoadedCount = 0;
+
+sigapSource.on('tileloadstart', function () {
+    console.debug(
+        '[SIGAP] Memuat tile kawasan hutan...'
+    );
+});
+
+sigapSource.on('tileloadend', function () {
+    sigapLoadedCount++;
+
+    if (sigapLoadedCount === 1) {
+        console.info(
+            '[SIGAP] Tile pertama berhasil dimuat.'
+        );
     }
-    var lyr_kwshutan_ar_250k_des2025_1 = new ol.layer.Tile({
-                            source: new ol.source.WMTS(({
-                                url: "https://sigap.kehutanan.go.id/sigap-forge-geoserver-2026/sigap/gwc/service/wmts",
-                                attributions: ' ',
-                                "layer": "kwshutan_ar_250k_des2025",
-                                "TILED": "true",
-             matrixSet: 'EPSG:3857',
-             format: 'image/jpeg',
-              projection: projection_kwshutan_ar_250k_des2025_1,
-              tileGrid: new ol.tilegrid.WMTS({
-                origin: ol.extent.getTopLeft(projectionExtent_kwshutan_ar_250k_des2025_1),
-                resolutions: resolutions_kwshutan_ar_250k_des2025_1,
-                matrixIds: matrixIds_kwshutan_ar_250k_des2025_1
-              }),
-              style: 'sigap:kwshutan_ar_250k_des2025_style',
-              wrapX: true,
-                                "VERSION": "1.0.0",
-                            })),
-                            title: 'kwshutan_ar_250k_des2025',
-                            opacity: 1.0,
-                            
-                            
-                          });
+});
+
+sigapSource.on('tileloaderror', function (event) {
+    sigapErrorCount++;
+
+    console.error(
+        '[SIGAP] Tile gagal dimuat. Total error:',
+        sigapErrorCount
+    );
+
+    if (event && event.tile) {
+        var image = event.tile.getImage &&
+            event.tile.getImage();
+
+        if (image && image.src) {
+            console.error(
+                '[SIGAP] URL tile gagal:',
+                image.src
+            );
+        }
+    }
+
+    console.warn(
+        '[SIGAP] Periksa tab Network untuk ' +
+        'mengetahui status HTTP, CORS, ' +
+        'atau kesalahan konfigurasi WMTS.'
+    );
+});
+
+console.info(
+    '[SIGAP] Konfigurasi WMTS diagnostik aktif.'
+);
+
 var format_point_mprilembo_rencana_awal_2 = new ol.format.GeoJSON();
 var features_point_mprilembo_rencana_awal_2 = format_point_mprilembo_rencana_awal_2.readFeatures(json_point_mprilembo_rencana_awal_2, 
             {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'});
